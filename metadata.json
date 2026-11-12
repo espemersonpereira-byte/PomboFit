@@ -1,0 +1,10 @@
+{
+  "name": "PomboFit — Treinamento, Evolução Física e Acompanhamento Pessoal",
+  "description": "Aplicativo inteligente de treinamento físico, biblioteca anatômica de exercícios, acompanhamento de desempenho e evolução com o mascote Pombo.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

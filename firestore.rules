@@ -1,0 +1,391 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function parentUserExists(userId) {
+      return exists(/databases/$(database)/documents/users/$(userId));
+    }
+
+    // Validation Blueprint: UserProfile
+    function isValidUserProfile(data) {
+      return (!('userId' in data) || (data.userId == request.auth.uid && data.userId is string && data.userId.size() <= 128)) &&
+        (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 120)) &&
+        (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 1000000)) &&
+        (!('personalPhotoUrl' in data) || (data.personalPhotoUrl is string && data.personalPhotoUrl.size() <= 1000000)) &&
+        (!('avatarType' in data) || (data.avatarType is string && data.avatarType.size() <= 60)) &&
+        (!('equippedHat' in data) || (data.equippedHat is string && data.equippedHat.size() <= 100)) &&
+        (!('equippedGlasses' in data) || (data.equippedGlasses is string && data.equippedGlasses.size() <= 100)) &&
+        (!('equippedMask' in data) || (data.equippedMask is string && data.equippedMask.size() <= 100)) &&
+        (!('equippedHeadband' in data) || (data.equippedHeadband is string && data.equippedHeadband.size() <= 100)) &&
+        (!('equippedOutfit' in data) || (data.equippedOutfit is string && data.equippedOutfit.size() <= 100)) &&
+        (!('equippedShoes' in data) || (data.equippedShoes is string && data.equippedShoes.size() <= 100)) &&
+        (!('equippedPose' in data) || (data.equippedPose is string && data.equippedPose.size() <= 100)) &&
+        (!('equippedSpecial' in data) || (data.equippedSpecial is string && data.equippedSpecial.size() <= 100));
+    }
+
+    // Validation Blueprint: WorkoutPlan
+    function isValidWorkoutPlan(data) {
+      return data.keys().hasAll([
+          'userId', 'name', 'muscleGroups', 'scheduledDays',
+          'estimatedDurationMin', 'exercises', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'userId', 'name', 'description', 'muscleGroups', 'scheduledDays',
+          'estimatedDurationMin', 'exercises', 'createdAt', 'updatedAt'
+        ]) &&
+        data.userId == request.auth.uid &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+        (!('description' in data) || (data.description is string && data.description.size() <= 400)) &&
+        data.muscleGroups is list && data.muscleGroups.size() <= 12 &&
+        (data.muscleGroups.size() == 0 || data.muscleGroups[0] is string) &&
+        data.scheduledDays is list && data.scheduledDays.size() <= 7 &&
+        (data.scheduledDays.size() == 0 || data.scheduledDays[0] is string) &&
+        data.estimatedDurationMin is number && data.estimatedDurationMin >= 5 && data.estimatedDurationMin <= 300 &&
+        data.exercises is list && data.exercises.size() <= 30 &&
+        (data.exercises.size() == 0 || data.exercises[0] is map) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: WorkoutSession
+    function isValidWorkoutSession(data) {
+      return data.keys().hasAll([
+          'userId', 'workoutId', 'workoutName', 'muscleGroups', 'dateISO',
+          'durationSeconds', 'totalVolumeKg', 'setsCompleted', 'exercisesCount',
+          'prCount', 'loggedSets', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'userId', 'workoutId', 'workoutName', 'muscleGroups', 'dateISO',
+          'durationSeconds', 'totalVolumeKg', 'setsCompleted', 'exercisesCount',
+          'prCount', 'loggedSets', 'notes', 'dataSource', 'healthProvider',
+          'activeCaloriesKcal', 'distanceKm', 'averageHeartRateBpm',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.userId == request.auth.uid &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.workoutId is string && data.workoutId.size() <= 128 &&
+        data.workoutName is string && data.workoutName.size() >= 1 && data.workoutName.size() <= 100 &&
+        data.muscleGroups is list && data.muscleGroups.size() <= 12 &&
+        (data.muscleGroups.size() == 0 || data.muscleGroups[0] is string) &&
+        data.dateISO is string && data.dateISO.size() <= 40 &&
+        data.durationSeconds is number && data.durationSeconds >= 0 &&
+        data.totalVolumeKg is number && data.totalVolumeKg >= 0 &&
+        data.setsCompleted is number && data.setsCompleted >= 0 &&
+        data.exercisesCount is number && data.exercisesCount >= 0 &&
+        data.prCount is number && data.prCount >= 0 &&
+        data.loggedSets is list && data.loggedSets.size() <= 120 &&
+        (data.loggedSets.size() == 0 || data.loggedSets[0] is map) &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 500)) &&
+        (!('dataSource' in data) || (data.dataSource is string && data.dataSource in ['manual', 'health_integration'])) &&
+        (!('healthProvider' in data) || (data.healthProvider is string && data.healthProvider in ['none', 'apple_health', 'health_connect'])) &&
+        (!('activeCaloriesKcal' in data) || (data.activeCaloriesKcal is number && data.activeCaloriesKcal >= 0 && data.activeCaloriesKcal <= 10000)) &&
+        (!('distanceKm' in data) || (data.distanceKm is number && data.distanceKm >= 0 && data.distanceKm <= 500)) &&
+        (!('averageHeartRateBpm' in data) || (data.averageHeartRateBpm is number && data.averageHeartRateBpm >= 30 && data.averageHeartRateBpm <= 250)) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: ExerciseHistoryLog
+    function isValidExerciseHistoryLog(data) {
+      return data.keys().hasAll([
+          'userId', 'exerciseId', 'exerciseName', 'muscleGroup', 'sessionId',
+          'dateISO', 'maxWeightKg', 'maxReps', 'totalVolumeKg', 'setsCount',
+          'setsSummary', 'isPR', 'createdAt'
+        ]) &&
+        data.keys().hasOnly([
+          'userId', 'exerciseId', 'exerciseName', 'muscleGroup', 'sessionId',
+          'dateISO', 'maxWeightKg', 'maxReps', 'totalVolumeKg', 'setsCount',
+          'setsSummary', 'isPR', 'createdAt'
+        ]) &&
+        data.userId == request.auth.uid &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.exerciseId is string && data.exerciseId.size() <= 128 &&
+        data.exerciseName is string && data.exerciseName.size() <= 120 &&
+        data.muscleGroup is string && data.muscleGroup.size() <= 60 &&
+        data.sessionId is string && data.sessionId.size() <= 128 &&
+        data.dateISO is string && data.dateISO.size() <= 40 &&
+        data.maxWeightKg is number && data.maxWeightKg >= 0 &&
+        data.maxReps is number && data.maxReps >= 0 &&
+        data.totalVolumeKg is number && data.totalVolumeKg >= 0 &&
+        data.setsCount is number && data.setsCount >= 1 &&
+        data.setsSummary is string && data.setsSummary.size() <= 300 &&
+        data.isPR is bool &&
+        data.createdAt is timestamp;
+    }
+
+    // Validation Blueprint: BodyMeasurement
+    function isValidBodyMeasurement(data) {
+      return data.keys().hasAll([
+          'userId', 'dateISO', 'weightKg', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'userId', 'dateISO', 'weightKg', 'heightCm', 'waistCm', 'abdomenCm', 'hipCm',
+          'armCm', 'forearmCm', 'thighCm', 'chestCm', 'calfCm', 'bodyFatPercent',
+          'notes', 'createdAt', 'updatedAt'
+        ]) &&
+        data.userId == request.auth.uid &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.dateISO is string && data.dateISO.size() <= 40 &&
+        data.weightKg is number && data.weightKg >= 20 && data.weightKg <= 400 &&
+        (!('heightCm' in data) || (data.heightCm is number && data.heightCm >= 50 && data.heightCm <= 260)) &&
+        (!('waistCm' in data) || (data.waistCm is number && data.waistCm >= 20 && data.waistCm <= 250)) &&
+        (!('abdomenCm' in data) || (data.abdomenCm is number && data.abdomenCm >= 20 && data.abdomenCm <= 250)) &&
+        (!('hipCm' in data) || (data.hipCm is number && data.hipCm >= 20 && data.hipCm <= 250)) &&
+        (!('armCm' in data) || (data.armCm is number && data.armCm >= 10 && data.armCm <= 120)) &&
+        (!('forearmCm' in data) || (data.forearmCm is number && data.forearmCm >= 10 && data.forearmCm <= 100)) &&
+        (!('thighCm' in data) || (data.thighCm is number && data.thighCm >= 20 && data.thighCm <= 150)) &&
+        (!('chestCm' in data) || (data.chestCm is number && data.chestCm >= 30 && data.chestCm <= 250)) &&
+        (!('calfCm' in data) || (data.calfCm is number && data.calfCm >= 15 && data.calfCm <= 100)) &&
+        (!('bodyFatPercent' in data) || (data.bodyFatPercent is number && data.bodyFatPercent >= 2 && data.bodyFatPercent <= 70)) &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 300)) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: ProgressPhoto
+    function isValidProgressPhoto(data) {
+      return data.keys().hasAll([
+          'userId', 'dateISO', 'poseLabel', 'imageDataUrl', 'createdAt'
+        ]) &&
+        data.keys().hasOnly([
+          'userId', 'dateISO', 'poseLabel', 'weightKg', 'imageDataUrl', 'notes', 'createdAt'
+        ]) &&
+        data.userId == request.auth.uid &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.dateISO is string && data.dateISO.size() <= 40 &&
+        data.poseLabel is string && data.poseLabel.size() >= 1 && data.poseLabel.size() <= 60 &&
+        (!('weightKg' in data) || (data.weightKg is number && data.weightKg >= 20 && data.weightKg <= 400)) &&
+        data.imageDataUrl is string && data.imageDataUrl.size() >= 10 && data.imageDataUrl.size() <= 700000 &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 300)) &&
+        data.createdAt is timestamp;
+    }
+
+    // Validation Blueprint: DailyHabitLog
+    function isValidDailyHabitLog(data) {
+      return data.keys().hasAll([
+          'userId', 'dateKey', 'waterMl', 'waterGoalMl', 'sleepHours',
+          'recoveryScore', 'meals', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'userId', 'dateKey', 'waterMl', 'waterGoalMl', 'sleepHours',
+          'recoveryScore', 'meals', 'notes', 'steps', 'activeCaloriesKcal',
+          'distanceKm', 'activeMinutes', 'heartRateBpm', 'healthSource',
+          'healthProvider', 'createdAt', 'updatedAt'
+        ]) &&
+        data.userId == request.auth.uid &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.dateKey is string && data.dateKey.size() <= 20 &&
+        data.waterMl is number && data.waterMl >= 0 && data.waterMl <= 15000 &&
+        data.waterGoalMl is number && data.waterGoalMl >= 500 && data.waterGoalMl <= 10000 &&
+        data.sleepHours is number && data.sleepHours >= 0 && data.sleepHours <= 24 &&
+        data.recoveryScore is number && data.recoveryScore >= 1 && data.recoveryScore <= 10 &&
+        data.meals is list && data.meals.size() <= 40 &&
+        (data.meals.size() == 0 || data.meals[0] is map) &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 400)) &&
+        (!('steps' in data) || (data.steps is number && data.steps >= 0 && data.steps <= 200000)) &&
+        (!('activeCaloriesKcal' in data) || (data.activeCaloriesKcal is number && data.activeCaloriesKcal >= 0 && data.activeCaloriesKcal <= 20000)) &&
+        (!('distanceKm' in data) || (data.distanceKm is number && data.distanceKm >= 0 && data.distanceKm <= 500)) &&
+        (!('activeMinutes' in data) || (data.activeMinutes is number && data.activeMinutes >= 0 && data.activeMinutes <= 1440)) &&
+        (!('heartRateBpm' in data) || (data.heartRateBpm is number && data.heartRateBpm >= 30 && data.heartRateBpm <= 250)) &&
+        (!('healthSource' in data) || (data.healthSource is string && data.healthSource in ['manual', 'health_integration', 'unavailable'])) &&
+        (!('healthProvider' in data) || (data.healthProvider is string && data.healthProvider in ['none', 'apple_health', 'health_connect'])) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: CalendarEntry
+    function isValidCalendarEntry(data) {
+      return data.keys().hasAll([
+          'userId', 'dateKey', 'workoutId', 'workoutName', 'entryType', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'userId', 'dateKey', 'workoutId', 'workoutName', 'entryType', 'notes', 'createdAt', 'updatedAt'
+        ]) &&
+        data.userId == request.auth.uid &&
+        data.userId is string && data.userId.size() <= 128 &&
+        data.dateKey is string && data.dateKey.size() <= 20 &&
+        data.workoutId is string && data.workoutId.size() <= 128 &&
+        data.workoutName is string && data.workoutName.size() <= 100 &&
+        data.entryType is string && data.entryType in ['planned', 'rest', 'completed', 'rescheduled'] &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 300)) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    // Connection test endpoint
+    match /test/{docId} {
+      allow get: if isSignedIn() && isValidId(docId);
+    }
+
+    // Root User Profile
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow create: if isOwner(userId) && isValidId(userId) &&
+        isValidUserProfile(incoming());
+      allow update: if isOwner(userId) && isValidId(userId) &&
+        isValidUserProfile(incoming());
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      // Subcollection: Custom Workout Plans (Fichas)
+      match /workouts/{workoutId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(workoutId) && parentUserExists(userId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(workoutId) &&
+          isValidWorkoutPlan(incoming()) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          parentUserExists(userId);
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(workoutId) &&
+          isValidWorkoutPlan(incoming()) &&
+          incoming().userId == existing().userId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'name', 'description', 'muscleGroups', 'scheduledDays',
+            'estimatedDurationMin', 'exercises', 'updatedAt'
+          ]) &&
+          parentUserExists(userId);
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(workoutId) && parentUserExists(userId);
+      }
+
+      // Subcollection: Completed Workout Sessions
+      match /sessions/{sessionId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(sessionId) && parentUserExists(userId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(sessionId) &&
+          isValidWorkoutSession(incoming()) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          parentUserExists(userId);
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(sessionId) &&
+          isValidWorkoutSession(incoming()) &&
+          incoming().userId == existing().userId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'workoutName', 'muscleGroups', 'durationSeconds', 'totalVolumeKg',
+            'setsCompleted', 'exercisesCount', 'prCount', 'loggedSets', 'notes',
+            'dataSource', 'healthProvider', 'activeCaloriesKcal', 'distanceKm',
+            'averageHeartRateBpm', 'updatedAt'
+          ]) &&
+          parentUserExists(userId);
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(sessionId) && parentUserExists(userId);
+      }
+
+      // Subcollection: Exercise History Logs
+      match /exerciseLogs/{logId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(logId) && parentUserExists(userId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(logId) &&
+          isValidExerciseHistoryLog(incoming()) &&
+          incoming().createdAt == request.time &&
+          parentUserExists(userId);
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(logId) && parentUserExists(userId);
+      }
+
+      // Subcollection: Body Measurements
+      match /measurements/{measurementId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(measurementId) && parentUserExists(userId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(measurementId) &&
+          isValidBodyMeasurement(incoming()) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          parentUserExists(userId);
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(measurementId) &&
+          isValidBodyMeasurement(incoming()) &&
+          incoming().userId == existing().userId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'dateISO', 'weightKg', 'heightCm', 'waistCm', 'abdomenCm', 'hipCm',
+            'armCm', 'forearmCm', 'thighCm', 'chestCm', 'calfCm', 'bodyFatPercent',
+            'notes', 'updatedAt'
+          ]) &&
+          parentUserExists(userId);
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(measurementId) && parentUserExists(userId);
+      }
+
+      // Subcollection: Progress Photos (Strictly Private to Owner)
+      match /photos/{photoId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(photoId) && parentUserExists(userId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(photoId) &&
+          isValidProgressPhoto(incoming()) &&
+          incoming().createdAt == request.time &&
+          parentUserExists(userId);
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(photoId) && parentUserExists(userId);
+      }
+
+      // Subcollection: Daily Habits & Hydration
+      match /habits/{dateKey} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(dateKey) && parentUserExists(userId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(dateKey) &&
+          isValidDailyHabitLog(incoming()) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          parentUserExists(userId);
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(dateKey) &&
+          isValidDailyHabitLog(incoming()) &&
+          incoming().userId == existing().userId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'waterMl', 'waterGoalMl', 'sleepHours', 'recoveryScore', 'meals', 'notes',
+            'steps', 'activeCaloriesKcal', 'distanceKm', 'activeMinutes',
+            'heartRateBpm', 'healthSource', 'healthProvider', 'updatedAt'
+          ]) &&
+          parentUserExists(userId);
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(dateKey) && parentUserExists(userId);
+      }
+
+      // Subcollection: Calendar Entries
+      match /calendar/{eventId} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(eventId) && parentUserExists(userId);
+        allow list: if isOwner(userId) && existing().userId == request.auth.uid;
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(eventId) &&
+          isValidCalendarEntry(incoming()) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          parentUserExists(userId);
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(eventId) &&
+          isValidCalendarEntry(incoming()) &&
+          incoming().userId == existing().userId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'dateKey', 'workoutId', 'workoutName', 'entryType', 'notes', 'updatedAt'
+          ]) &&
+          parentUserExists(userId);
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(eventId) && parentUserExists(userId);
+      }
+    }
+  }
+}

@@ -1,0 +1,363 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-primary: #7650C9;
+}
+
+@layer base {
+  :root {
+    --color-primary: #7650C9;
+    --color-lilac-soft: #F2EDFF;
+    --color-lilac-secondary: #E4D9FF;
+    --color-graphite: #24212B;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  html,
+  body,
+  #root {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    background-color: #FAF8FF;
+    color: #1E1638;
+    max-width: 100vw;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+/* Strictly enforce >=16px font-size on all form controls outside @layer base so Tailwind text-xs / text-sm utilities never trigger iOS Safari auto-zoom on focus */
+input,
+select,
+textarea {
+  font-size: 16px !important;
+  line-height: 1.35;
+  touch-action: manipulation;
+}
+
+/* Remove native spin buttons on numeric inputs so all typed digits remain clearly visible and centered */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+button,
+a,
+label,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+.font-mono-tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.pt-safe {
+  padding-top: max(0.85rem, env(safe-area-inset-top, 0px));
+}
+
+.pb-safe {
+  padding-bottom: max(0.85rem, env(safe-area-inset-bottom, 0px));
+}
+
+.pl-safe {
+  padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+}
+
+.pr-safe {
+  padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
+}
+
+.min-h-screen-safe {
+  min-height: 100dvh;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F8F7FA;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D8D0EC;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7650C9;
+}
+
+/* =========================================================================
+   SISTEMA VISUAL DARK MODE OFICIAL POMBOFIT (.dark-theme)
+   ========================================================================= */
+
+/* 1. Fundo Principal do Aplicativo (Grafite Profundo com Tonalidade Roxa) */
+html.dark-theme,
+body.dark-theme,
+html.dark-theme #root,
+.dark-theme {
+  background-color: #121019 !important;
+  color: #F8FAFC !important;
+}
+
+.dark-theme ::-webkit-scrollbar-track {
+  background: #14121F;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+  background: #3B2D63;
+}
+
+/* 2. Superfícies Primárias de Cartões, Modais, Cabeçalho e Navegação (#181622) */
+.dark-theme header,
+.dark-theme nav[aria-label="Navegação Principal"],
+.dark-theme aside,
+.dark-theme .bg-white:not(.exercise-illustration-canvas),
+.dark-theme [class*="bg-white"]:not(.exercise-illustration-canvas) {
+  background-color: #181622 !important;
+  border-color: rgba(139, 92, 246, 0.26) !important;
+  color: #F8FAFC !important;
+}
+
+/* 3. Superfícies Secundárias Elevadas, Sub-Cartões e Painéis Internos (#201D2E) */
+.dark-theme [class*="bg-slate-50"],
+.dark-theme [class*="bg-gray-50"],
+.dark-theme [class*="bg-[#FAF9FC]"],
+.dark-theme [class*="bg-[#FAF8FF]"]:not(:has(> .exercise-illustration-canvas)),
+.dark-theme [class*="bg-[#F8F5FF]"],
+.dark-theme [class*="bg-[#F8F6FC]"],
+.dark-theme [class*="bg-[#F7F3FF]"],
+.dark-theme [class*="bg-[#F6F3FF]"],
+.dark-theme [class*="bg-[#F4F0FF]"],
+.dark-theme [class*="bg-[#F1EBFE]"] {
+  background-color: #201D2E !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  color: #F1F5F9 !important;
+}
+
+/* 4. Neutralização de Gradientes Claros (Pombo IA, Demonstrações, Mapas, Modais e Gaveta) */
+.dark-theme [class*="from-white"],
+.dark-theme [class*="to-white"],
+.dark-theme [class*="via-white"],
+.dark-theme [class*="via-[#FFFFFF]"],
+.dark-theme [class*="from-[#F6F3FF]"],
+.dark-theme [class*="to-[#EDE5FF]"],
+.dark-theme [class*="from-[#FAF8FF]"],
+.dark-theme [class*="to-[#FAF8FF]"],
+.dark-theme [class*="to-[#F3EEFF]"],
+.dark-theme [class*="from-[#F2EDFF]"],
+.dark-theme [class*="to-[#F2EDFF]"],
+.dark-theme [class*="from-[#EDE7FD]"],
+.dark-theme [class*="from-[#F0EBFE]"],
+.dark-theme [class*="from-[#F5F1FF]"],
+.dark-theme [class*="from-purple-50"],
+.dark-theme [class*="from-purple-100"],
+.dark-theme [class*="from-slate-50"],
+.dark-theme [class*="from-amber-50"],
+.dark-theme [class*="from-cyan-50"] {
+  background-image: linear-gradient(135deg, #201B32 0%, #292142 100%) !important;
+  background-color: #201B32 !important;
+  border-color: rgba(139, 92, 246, 0.36) !important;
+  color: #F8FAFC !important;
+}
+
+/* 5. Botões Secundários, Etiquetas, Badges, Filtros e Quadrados de Ícones (#282142 + Texto Lavanda #DDD6FE)
+      Referência aprovada: contraste idêntico ao badge "Treino PomboFit" */
+.dark-theme [class*="bg-[#F0EBFE]"],
+.dark-theme [class*="bg-[#F2EDFF]"],
+.dark-theme [class*="bg-[#F3EEFF]"],
+.dark-theme [class*="bg-[#EBE3FF]"],
+.dark-theme [class*="bg-[#EBE2FD]"],
+.dark-theme [class*="bg-[#EDE7FD]"],
+.dark-theme [class*="bg-[#EDE4FF]"],
+.dark-theme [class*="bg-[#E5DCFD]"],
+.dark-theme [class*="bg-[#E4DCFC]"],
+.dark-theme [class*="bg-[#E4DAFD]"],
+.dark-theme [class*="bg-[#E4D9FF]"],
+.dark-theme [class*="bg-[#DFD2FC]"],
+.dark-theme [class*="bg-purple-50"],
+.dark-theme [class*="bg-purple-100"],
+.dark-theme [class*="bg-purple-200"],
+.dark-theme [class*="bg-violet-50"],
+.dark-theme [class*="bg-indigo-50"],
+.dark-theme [class*="bg-slate-100"]:not(:has(> img)),
+.dark-theme [class*="bg-slate-200"],
+.dark-theme [class*="bg-gray-100"],
+.dark-theme [class*="bg-[#E5E7EB]"] {
+  background-color: #282142 !important;
+  color: #DDD6FE !important;
+  border-color: rgba(139, 92, 246, 0.42) !important;
+}
+
+.dark-theme button[class*="bg-[#F0EBFE]"]:hover,
+.dark-theme button[class*="bg-[#F2EDFF]"]:hover,
+.dark-theme button[class*="bg-[#F6F3FF]"]:hover,
+.dark-theme button[class*="bg-[#FAF8FF]"]:hover,
+.dark-theme label[class*="bg-[#F0EBFE]"]:hover {
+  background-color: #342A56 !important;
+  color: #FFFFFF !important;
+}
+
+/* Preservar botões primários e estados selecionados em Roxo Vibrante com texto branco */
+.dark-theme [class*="bg-[#5E2EE8]"],
+.dark-theme [class*="bg-[#7650C9]"],
+.dark-theme [class*="bg-[#4E21D0]"] {
+  background-color: #6534EB !important;
+  color: #FFFFFF !important;
+}
+
+/* Estados desabilitados legíveis no modo escuro */
+.dark-theme button:disabled {
+  opacity: 0.55 !important;
+}
+
+/* 6. Alertas Semânticos e Etiquetas de Status (Verde, Âmbar, Rosa/Vermelho) */
+.dark-theme [class*="bg-emerald-50"],
+.dark-theme [class*="bg-emerald-100"],
+.dark-theme [class*="bg-[#E8F8F0]"] {
+  background-color: rgba(16, 185, 129, 0.16) !important;
+  border-color: rgba(16, 185, 129, 0.38) !important;
+  color: #6EE7B7 !important;
+}
+
+.dark-theme [class*="bg-amber-50"],
+.dark-theme [class*="bg-amber-100"],
+.dark-theme [class*="bg-[#FFF0E8]"] {
+  background-color: rgba(245, 158, 11, 0.16) !important;
+  border-color: rgba(245, 158, 11, 0.38) !important;
+  color: #FDE68A !important;
+}
+
+.dark-theme [class*="bg-rose-50"],
+.dark-theme [class*="bg-rose-100"],
+.dark-theme [class*="bg-red-50"],
+.dark-theme [class*="bg-red-100"] {
+  background-color: rgba(244, 63, 94, 0.16) !important;
+  border-color: rgba(244, 63, 94, 0.38) !important;
+  color: #FDA4AF !important;
+}
+
+.dark-theme [class*="text-emerald-700"],
+.dark-theme [class*="text-emerald-800"],
+.dark-theme [class*="text-emerald-900"],
+.dark-theme [class*="text-emerald-950"] {
+  color: #6EE7B7 !important;
+}
+
+.dark-theme [class*="text-amber-700"],
+.dark-theme [class*="text-amber-800"],
+.dark-theme [class*="text-amber-900"],
+.dark-theme [class*="text-amber-950"] {
+  color: #FDE68A !important;
+}
+
+.dark-theme [class*="text-rose-700"],
+.dark-theme [class*="text-rose-800"],
+.dark-theme [class*="text-red-700"] {
+  color: #FDA4AF !important;
+}
+
+.dark-theme [class*="text-purple-950"] {
+  color: #EDE9FE !important;
+}
+
+/* 7. Hierarquia Tipográfica e Contraste Global no Modo Escuro */
+.dark-theme [class*="text-[#1E1638]"],
+.dark-theme [class*="text-[#24212B]"],
+.dark-theme [class*="text-[#44189E]"],
+.dark-theme [class*="text-slate-900"],
+.dark-theme [class*="text-slate-800"],
+.dark-theme [class*="text-slate-700"] {
+  color: #F8FAFC !important;
+}
+
+.dark-theme [class*="text-[#5E5177]"],
+.dark-theme [class*="text-slate-600"],
+.dark-theme [class*="text-slate-500"],
+.dark-theme [class*="text-slate-400"],
+.dark-theme [class*="text-gray-600"],
+.dark-theme [class*="text-gray-500"] {
+  color: #C4B5FD !important;
+}
+
+.dark-theme [class*="text-[#5E2EE8]"],
+.dark-theme [class*="text-[#7650C9]"],
+.dark-theme [class*="text-[#5520D8]"],
+.dark-theme [class*="text-[#8042F7]"],
+.dark-theme [class*="text-purple-700"],
+.dark-theme [class*="text-purple-900"] {
+  color: #DDD6FE !important;
+}
+
+/* 8. Campos de Formulário, Seletores e Inputs */
+.dark-theme input:not([type="checkbox"]):not([type="radio"]),
+.dark-theme select,
+.dark-theme textarea {
+  background-color: #14121F !important;
+  border-color: rgba(139, 92, 246, 0.42) !important;
+  color: #F8FAFC !important;
+}
+
+.dark-theme input::placeholder,
+.dark-theme textarea::placeholder {
+  color: #A78BFA !important;
+  opacity: 0.72;
+}
+
+/* 9. Bordas Discretas e Divisores */
+.dark-theme .border-slate-100,
+.dark-theme .border-slate-200,
+.dark-theme .border-purple-50,
+.dark-theme .border-purple-100,
+.dark-theme .border-purple-200,
+.dark-theme [class*="border-slate-"],
+.dark-theme [class*="border-purple-"],
+.dark-theme [class*="border-[#EDE"],
+.dark-theme [class*="border-[#E4D"],
+.dark-theme [class*="border-[#E5D"],
+.dark-theme [class*="border-[#DDD"],
+.dark-theme [class*="border-[#E2D"] {
+  border-color: rgba(139, 92, 246, 0.3) !important;
+}
+
+/* 10. REGRA FUNDAMENTAL PARA DEMONSTRAÇÕES DE EXERCÍCIOS E MAPAS ANATÔMICOS:
+       Manter o fundo branco interno original das ilustrações, sem filtros, sem inversão e sem opacidade reduzida */
+.dark-theme .exercise-illustration-canvas,
+.dark-theme div:has(> .exercise-illustration-canvas) {
+  background-color: #FFFFFF !important;
+  border-color: rgba(139, 92, 246, 0.35) !important;
+}
+
+.dark-theme img {
+  filter: none !important;
+  opacity: 1 !important;
+}
+

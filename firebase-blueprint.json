@@ -1,0 +1,684 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile, onboarding configuration, mascot state, and gamification progress.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "photoURL": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "age": {
+          "type": "number"
+        },
+        "heightCm": {
+          "type": "number"
+        },
+        "weightKg": {
+          "type": "number"
+        },
+        "goal": {
+          "type": "string",
+          "enum": ["lose_weight", "gain_muscle", "get_strong"]
+        },
+        "mascotForm": {
+          "type": "string",
+          "enum": ["pombo_seco", "pombo_grande", "pombo_bruto"]
+        },
+        "experienceLevel": {
+          "type": "string",
+          "enum": ["beginner", "intermediate", "advanced"]
+        },
+        "trainingLocation": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "availableEquipment": {
+          "type": "array",
+          "maxLength": 15
+        },
+        "weeklyDays": {
+          "type": "number"
+        },
+        "sessionDurationMin": {
+          "type": "number"
+        },
+        "priorityMuscles": {
+          "type": "array",
+          "maxLength": 15
+        },
+        "limitations": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "xp": {
+          "type": "number"
+        },
+        "level": {
+          "type": "number"
+        },
+        "streakDays": {
+          "type": "number"
+        },
+        "unlockedAchievementIds": {
+          "type": "array",
+          "maxLength": 50
+        },
+        "unlockedAccessories": {
+          "type": "array",
+          "maxLength": 100
+        },
+        "avatarType": {
+          "type": "string",
+          "enum": ["personal", "pombo_head", "pombo_custom"]
+        },
+        "personalPhotoUrl": {
+          "type": "string",
+          "maxLength": 700000
+        },
+        "equippedHat": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "equippedGlasses": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "equippedMask": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "equippedHeadband": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "equippedOutfit": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "equippedShoes": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "equippedPose": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "equippedSpecial": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "favoriteExerciseIds": {
+          "type": "array",
+          "maxLength": 100
+        },
+        "recentExerciseIds": {
+          "type": "array",
+          "maxLength": 30
+        },
+        "waterGoalMl": {
+          "type": "number"
+        },
+        "caloriesGoal": {
+          "type": "number"
+        },
+        "proteinGoalG": {
+          "type": "number"
+        },
+        "carbsGoalG": {
+          "type": "number"
+        },
+        "fatGoalG": {
+          "type": "number"
+        },
+        "unitSystem": {
+          "type": "string",
+          "enum": ["metric", "imperial"]
+        },
+        "autoStartRestTimer": {
+          "type": "boolean"
+        },
+        "soundAlerts": {
+          "type": "boolean"
+        },
+        "notifWorkoutReminder": {
+          "type": "boolean"
+        },
+        "notifWeeklyGoal": {
+          "type": "boolean"
+        },
+        "notifAchievements": {
+          "type": "boolean"
+        },
+        "notifWaterReminder": {
+          "type": "boolean"
+        },
+        "healthProvider": {
+          "type": "string",
+          "enum": ["none", "apple_health", "health_connect"]
+        },
+        "healthConnected": {
+          "type": "boolean"
+        },
+        "healthPermissions": {
+          "type": "array",
+          "maxLength": 10
+        },
+        "healthLastSyncISO": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "onboardingCompleted": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "displayName",
+        "goal",
+        "mascotForm",
+        "experienceLevel",
+        "weeklyDays",
+        "sessionDurationMin",
+        "xp",
+        "level",
+        "onboardingCompleted",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "WorkoutPlan": {
+      "title": "WorkoutPlan",
+      "description": "Custom workout sheet created or imported by the user.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "muscleGroups": {
+          "type": "array",
+          "maxLength": 12
+        },
+        "scheduledDays": {
+          "type": "array",
+          "maxLength": 7
+        },
+        "estimatedDurationMin": {
+          "type": "number"
+        },
+        "exercises": {
+          "type": "array",
+          "maxLength": 30
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "name",
+        "muscleGroups",
+        "scheduledDays",
+        "estimatedDurationMin",
+        "exercises",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "WorkoutSession": {
+      "title": "WorkoutSession",
+      "description": "Completed or active workout session with logged sets.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "workoutId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "workoutName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "muscleGroups": {
+          "type": "array",
+          "maxLength": 12
+        },
+        "dateISO": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "durationSeconds": {
+          "type": "number"
+        },
+        "totalVolumeKg": {
+          "type": "number"
+        },
+        "setsCompleted": {
+          "type": "number"
+        },
+        "exercisesCount": {
+          "type": "number"
+        },
+        "prCount": {
+          "type": "number"
+        },
+        "loggedSets": {
+          "type": "array",
+          "maxLength": 120
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "workoutId",
+        "workoutName",
+        "muscleGroups",
+        "dateISO",
+        "durationSeconds",
+        "totalVolumeKg",
+        "setsCompleted",
+        "exercisesCount",
+        "prCount",
+        "loggedSets",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ExerciseHistoryLog": {
+      "title": "ExerciseHistoryLog",
+      "description": "Individual exercise performance log entry for history and progression graphs.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "exerciseId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "exerciseName": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "muscleGroup": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "sessionId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "dateISO": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "maxWeightKg": {
+          "type": "number"
+        },
+        "maxReps": {
+          "type": "number"
+        },
+        "totalVolumeKg": {
+          "type": "number"
+        },
+        "setsCount": {
+          "type": "number"
+        },
+        "setsSummary": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "isPR": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "exerciseId",
+        "exerciseName",
+        "muscleGroup",
+        "sessionId",
+        "dateISO",
+        "maxWeightKg",
+        "maxReps",
+        "totalVolumeKg",
+        "setsCount",
+        "setsSummary",
+        "isPR",
+        "createdAt"
+      ]
+    },
+    "BodyMeasurement": {
+      "title": "BodyMeasurement",
+      "description": "User body measurements entry for physical progress tracking.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "dateISO": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "weightKg": {
+          "type": "number"
+        },
+        "heightCm": {
+          "type": "number"
+        },
+        "waistCm": {
+          "type": "number"
+        },
+        "abdomenCm": {
+          "type": "number"
+        },
+        "hipCm": {
+          "type": "number"
+        },
+        "armCm": {
+          "type": "number"
+        },
+        "forearmCm": {
+          "type": "number"
+        },
+        "thighCm": {
+          "type": "number"
+        },
+        "chestCm": {
+          "type": "number"
+        },
+        "calfCm": {
+          "type": "number"
+        },
+        "bodyFatPercent": {
+          "type": "number"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "dateISO",
+        "weightKg",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ProgressPhoto": {
+      "title": "ProgressPhoto",
+      "description": "Private user progress photo entry for visual comparison.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "dateISO": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "poseLabel": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "weightKg": {
+          "type": "number"
+        },
+        "imageDataUrl": {
+          "type": "string",
+          "maxLength": 700000
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "dateISO",
+        "poseLabel",
+        "imageDataUrl",
+        "createdAt"
+      ]
+    },
+    "DailyHabitLog": {
+      "title": "DailyHabitLog",
+      "description": "Daily hydration, meals, sleep, and recovery log.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "dateKey": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "waterMl": {
+          "type": "number"
+        },
+        "waterGoalMl": {
+          "type": "number"
+        },
+        "sleepHours": {
+          "type": "number"
+        },
+        "recoveryScore": {
+          "type": "number"
+        },
+        "meals": {
+          "type": "array",
+          "maxLength": 15
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "steps": {
+          "type": "number"
+        },
+        "activeCaloriesKcal": {
+          "type": "number"
+        },
+        "distanceKm": {
+          "type": "number"
+        },
+        "activeMinutes": {
+          "type": "number"
+        },
+        "heartRateBpm": {
+          "type": "number"
+        },
+        "healthSource": {
+          "type": "string",
+          "enum": ["manual", "health_integration", "unavailable"]
+        },
+        "healthProvider": {
+          "type": "string",
+          "enum": ["none", "apple_health", "health_connect"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "dateKey",
+        "waterMl",
+        "waterGoalMl",
+        "sleepHours",
+        "recoveryScore",
+        "meals",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CalendarEntry": {
+      "title": "CalendarEntry",
+      "description": "Scheduled workout or rest day entry in the user calendar.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "dateKey": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "workoutId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "workoutName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "entryType": {
+          "type": "string",
+          "enum": ["planned", "rest", "completed", "rescheduled"]
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "dateKey",
+        "workoutId",
+        "workoutName",
+        "entryType",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Root user profile and configuration document."
+    },
+    "/users/{userId}/workouts/{workoutId}": {
+      "schema": "WorkoutPlan",
+      "description": "User custom workout sheets (fichas de treino)."
+    },
+    "/users/{userId}/sessions/{sessionId}": {
+      "schema": "WorkoutSession",
+      "description": "Completed workout sessions."
+    },
+    "/users/{userId}/exerciseLogs/{logId}": {
+      "schema": "ExerciseHistoryLog",
+      "description": "Per-exercise performance history records."
+    },
+    "/users/{userId}/measurements/{measurementId}": {
+      "schema": "BodyMeasurement",
+      "description": "Body weight and circumference measurements."
+    },
+    "/users/{userId}/photos/{photoId}": {
+      "schema": "ProgressPhoto",
+      "description": "Private progress photos for comparison."
+    },
+    "/users/{userId}/habits/{dateKey}": {
+      "schema": "DailyHabitLog",
+      "description": "Daily hydration, meals, and sleep habits."
+    },
+    "/users/{userId}/calendar/{eventId}": {
+      "schema": "CalendarEntry",
+      "description": "Planned and reorganized calendar entries."
+    }
+  }
+}
